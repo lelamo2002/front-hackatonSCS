@@ -37,7 +37,7 @@ export default function LoginPage() {
     setTimeout(() => {
       setIsLoading(false);
       // alert("Login realizado com sucesso!"); // Removed alert to just redirect
-      router.replace("/");
+      router.replace("/(tabs)");
     }, 1000);
   };
 

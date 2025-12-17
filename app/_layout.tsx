@@ -6,7 +6,7 @@ import "../global.css";
 export default function RootLayout() {
   const insets = useSafeAreaInsets();
   return (
-  <View className="flex-1" style={{ paddingTop: insets.top }}>
+  <View className="flex-1" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="register" />

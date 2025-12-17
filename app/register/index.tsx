@@ -50,6 +50,10 @@ const step1Schema = z.object({
 const step2Schema = z.object({
   email: z.string().email("Email inválido"),
   senha: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
+  confirmarSenha: z.string().min(6, "Confirmação deve ter no mínimo 6 caracteres"),
+}).refine((data) => data.senha === data.confirmarSenha, {
+  message: "As senhas não conferem",
+  path: ["confirmarSenha"],
 });
 
 // Schema para etapa 3 - Veículo (opcional)
@@ -96,6 +100,7 @@ export default function RegisterPage() {
     defaultValues: {
       email: formData.email || "",
       senha: formData.senha || "",
+      confirmarSenha: formData.confirmarSenha || "",
     },
   });
 
@@ -129,7 +134,7 @@ export default function RegisterPage() {
     console.log("Dados finais:", finalData);
     // Aqui você pode enviar os dados para a API
     alert("Cadastro realizado com sucesso!");
-    router.replace("/");
+    router.replace("/(tabs)");
   };
 
   const formatCPF = (text: string) => {
@@ -281,7 +286,7 @@ export default function RegisterPage() {
               )}
             </View>
 
-            <View className="mb-6">
+            <View className="mb-4">
               <Text className="text-sm font-medium text-gray-700 mb-2">Senha</Text>
               <Controller
                 control={control2}
@@ -299,6 +304,27 @@ export default function RegisterPage() {
               />
               {errors2.senha && (
                 <Text className="text-red-500 text-sm mt-1">{errors2.senha.message}</Text>
+              )}
+            </View>
+
+            <View className="mb-6">
+              <Text className="text-sm font-medium text-gray-700 mb-2">Confirmar Senha</Text>
+              <Controller
+                control={control2}
+                name="confirmarSenha"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    className="border border-gray-300 rounded-lg px-4 py-3 text-base"
+                    placeholder="Confirme sua senha"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    secureTextEntry
+                  />
+                )}
+              />
+              {errors2.confirmarSenha && (
+                <Text className="text-red-500 text-sm mt-1">{errors2.confirmarSenha.message}</Text>
               )}
             </View>
 
