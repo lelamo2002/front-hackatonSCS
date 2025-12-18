@@ -46,6 +46,16 @@ export const tickets = {
   redeemDefault: async (chave: string) => {
     const response = await api.post('/tickets/descontos', { chave });
     return response.data;
+  },
+  create: async (data: { 
+    tipoHoras: number; 
+    timestampEntrada: string; 
+    placaDoCarro: string; 
+    usarCredito: boolean 
+  }) => {
+    const response = await api.post('/tickets', data);
+    console.log(response);
+    return response.data;
   }
 };
 

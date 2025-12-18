@@ -1,209 +1,205 @@
-import { useState } from "react";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
-    FlatList,
-    Modal,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import Icon from "react-native-remix-icon";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "../../global.css";
 
-// --- DADOS ---
-const CARS = [
-  { id: "1", model: "Honda Civic", plate: "ABC-1234" },
-  { id: "2", model: "Toyota Corolla", plate: "XYZ-9876" },
-  { id: "3", model: "Fiat Uno", plate: "UNO-2025" },
-];
+// Importações do Projeto
+import { tickets } from "../../api"; // Certifique-se que o caminho está correto
+import OSMWebView from "../components/OSMWebView";
 
-const HOURS = [1, 2, 3, 4, 5];
+export default function CheckIn() {
+  const router = useRouter();
 
-const PAYMENTS = [
-  { id: "balance", label: "Usar Saldo", balance: "R$ 50,00" },
-  { id: "credit", label: "Pagar Agora (Cartão/Pix)", balance: null },
-];
-
-export default function Checkin() {
-  const [step, setStep] = useState(0); // 0: Carro, 1: Horas, 2: Pagamento, 3: Fim
+  // Estados do Formulário
+  const [placa, setPlaca] = useState("ABC-1D23");
+  const [tempo, setTempo] = useState("1");
+  const [usarCredito, setUsarCredito] = useState(true); // true = Saldo, false = Cartão
   
-  // Dados Selecionados
-  const [selectedCar, setSelectedCar] = useState(null);
-  const [selectedHour, setSelectedHour] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState(null);
+  // Estado de Loading
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Controle dos Modais (Dropdowns)
-  const [isCarModalOpen, setIsCarModalOpen] = useState(false);
-  const [isHourModalOpen, setIsHourModalOpen] = useState(false);
+  // Função de Integração
+  const handleEstacionar = async () => {
+    if (!placa || !tempo) {
+      Alert.alert("Atenção", "Preencha a placa e o tempo desejado.");
+      return;
+    }
 
-  // --- AÇÕES ---
+    setIsLoading(true);
 
-  const handleSelectCar = (car) => {
-    setSelectedCar(car);
-    setIsCarModalOpen(false); // Fecha dropdown
-    if (step === 0) setStep(1); // Avança etapa
+    try {
+      // 1. Monta o Payload conforme solicitado
+      const payload = {
+        tipoHoras: Number(tempo),
+        timestampEntrada: new Date().toISOString(),
+        placaDoCarro: placa.toUpperCase().replace("-", ""), // Remove traço se necessário
+        usarCredito: usarCredito
+      };
+
+      console.log("Enviando:", payload);
+
+      // 2. Chama a API
+      await tickets.create(payload);
+
+      // 3. Sucesso
+      Alert.alert("Sucesso!", "Seu ticket foi criado e o estacionamento está ativo.", [
+        { text: "OK", onPress: () => router.push("/") }
+      ]);
+
+    } catch (error: any) {
+      console.error(error);
+      const mensagem = error.response?.data?.message || "Não foi possível criar o ticket.";
+      Alert.alert("Erro", mensagem);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSelectHour = (hour) => {
-    setSelectedHour(hour);
-    setIsHourModalOpen(false); // Fecha dropdown
-    if (step === 1) setStep(2); // Avança etapa
-  };
-
-  const handleSelectPayment = (method) => {
-    setPaymentMethod(method);
-    setStep(3);
-  };
-
-  const resetFlow = () => {
-    setStep(0);
-    setSelectedCar(null);
-    setSelectedHour(null);
-    setPaymentMethod(null);
-  };
-
-  // --- COMPONENTES AUXILIARES ---
-
-  // Componente visual do botão "Dropdown"
-  const DropdownTrigger = ({ label, value, onPress, disabled }) => (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled}
-      className={`flex-row justify-between items-center p-4 bg-gray-50 border border-gray-300 rounded-lg ${
-        disabled ? "opacity-50" : "active:border-blue-500"
-      }`}
-    >
-      <Text className={value ? "text-gray-900 font-semibold" : "text-gray-400"}>
-        {value || label}
-      </Text>
-      <Text className="text-gray-500">▼</Text>
-    </TouchableOpacity>
-  );
+  // Cálculo visual do preço (exemplo R$ 3,00/h)
+  const valorTotal = Number(tempo) * 3.00;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
-      <ScrollView className="p-6">
-        <Text className="text-2xl font-bold text-gray-800 mb-6">
-          Novo Check-in
-        </Text>
+    <View className="flex-1 bg-gray-50">
+      {/* MAPA (Background) */}
+      <View className="absolute inset-0 z-0">
+        <OSMWebView />
+        <View className="absolute inset-0 bg-white/10" />
+      </View>
 
-        {/* --- PASSO 1: SELEÇÃO DO CARRO (DROPDOWN) --- */}
-        <View className="bg-white rounded-xl p-4 shadow-sm mb-4 border border-gray-200">
-          <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-lg font-semibold text-slate-700">1. Veículo</Text>
+      <SafeAreaView className="flex-1">
+        
+        {/* HEADER */}
+        <View className="px-6 py-4 flex-row items-center justify-between">
+          <TouchableOpacity 
+            className="w-12 h-12 bg-white rounded-xl shadow-sm items-center justify-center"
+            onPress={() => router.back()}
+            disabled={isLoading}
+          >
+            <Icon name="arrow-left-s-line" size={24} color="#374151" />
+          </TouchableOpacity>
+          
+          <View className="bg-white px-4 py-2 rounded-xl shadow-sm">
+            <Text className="font-bold text-gray-900">Novo Ticket</Text>
           </View>
-          
-          <DropdownTrigger 
-            label="Selecione o veículo..."
-            value={selectedCar ? `${selectedCar.model} - ${selectedCar.plate}` : null}
-            onPress={() => setIsCarModalOpen(true)}
-            disabled={step > 0 && false} // Permite reabrir para editar
-          />
+          <View className="w-12" /> 
         </View>
 
-        {/* --- PASSO 2: HORAS (DROPDOWN) --- */}
-        <View className={`bg-white rounded-xl p-4 shadow-sm mb-4 border border-gray-200 ${step < 1 && "opacity-50"}`}>
-          <Text className="text-lg font-semibold text-slate-700 mb-2">2. Tempo de Estadia</Text>
-          
-          <DropdownTrigger 
-            label="Selecione a duração..."
-            value={selectedHour ? `${selectedHour} Horas` : null}
-            onPress={() => setIsHourModalOpen(true)}
-            disabled={step < 1} // Bloqueado até selecionar carro
-          />
-        </View>
-
-        {/* --- PASSO 3: PAGAMENTO (BOTÕES) --- */}
-        <View className={`bg-white rounded-xl p-4 shadow-sm mb-4 border border-gray-200 ${step < 2 && "opacity-50"}`}>
-          <Text className="text-lg font-semibold text-slate-700 mb-2">3. Pagamento</Text>
-          
-          {step >= 2 && step < 3 && (
-            <View className="gap-3 mt-2">
-              {PAYMENTS.map((method) => (
-                <TouchableOpacity
-                  key={method.id}
-                  onPress={() => handleSelectPayment(method)}
-                  className="p-4 rounded-lg bg-gray-50 border-2 border-gray-100 flex-row justify-between items-center active:bg-blue-50 active:border-blue-200"
-                >
-                  <View>
-                    <Text className="font-bold text-gray-800">{method.label}</Text>
-                    {method.balance && (
-                      <Text className="text-green-600 text-sm">Disponível: {method.balance}</Text>
-                    )}
-                  </View>
-                  <View className="w-4 h-4 rounded-full border border-gray-400" />
-                </TouchableOpacity>
-              ))}
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1 justify-end"
+        >
+          {/* BOTTOM SHEET DO FORMULÁRIO */}
+          <View className="bg-gray-50 rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] p-6 pb-8 border-t border-gray-100">
+            
+            {/* 1. VEÍCULO */}
+            <View className="bg-white rounded-2xl p-4 shadow-sm mb-4 flex-row items-center space-x-4">
+              <View className="w-14 h-14 bg-blue-600 rounded-xl items-center justify-center shadow-sm">
+                <Icon name="car-line" size={28} color="white" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-gray-500 text-xs uppercase font-bold mb-1">Veículo</Text>
+                <TextInput 
+                  className="font-bold text-gray-900 text-xl p-0"
+                  value={placa}
+                  onChangeText={setPlaca}
+                  autoCapitalize="characters"
+                  editable={!isLoading}
+                />
+              </View>
             </View>
-          )}
 
-          {/* STATUS FINAL */}
-          {step === 3 && (
-             <View className="p-4 bg-green-50 rounded-lg border border-green-100 items-center">
-                <Text className="font-bold text-green-800 text-lg">Check-in Confirmado!</Text>
-                <Text className="text-gray-600 mt-1">{selectedCar?.model}</Text>
-                <Text className="text-gray-600">{selectedHour} horas</Text>
+            {/* 2. TEMPO (tipoHoras) */}
+            <View className="flex-row items-center justify-between mb-4 bg-white p-4 rounded-2xl shadow-sm">
+              <Text className="font-semibold text-gray-900 text-lg">Tempo (Horas)</Text>
+              
+              <View className="flex-row items-center space-x-4">
+                <TouchableOpacity 
+                  onPress={() => setTempo(String(Math.max(1, Number(tempo) - 1)))}
+                  className="w-10 h-10 bg-gray-100 rounded-lg items-center justify-center active:bg-gray-200"
+                  disabled={isLoading}
+                >
+                  <Icon name="subtract-line" size={20} color="#374151" />
+                </TouchableOpacity>
+
+                <Text className="text-2xl font-bold text-blue-600 w-8 text-center">{tempo}</Text>
                 
                 <TouchableOpacity 
-                  onPress={resetFlow}
-                  className="mt-4 bg-green-600 py-3 px-8 rounded-full shadow-md active:bg-green-700"
+                  onPress={() => setTempo(String(Number(tempo) + 1))}
+                  className="w-10 h-10 bg-blue-50 rounded-lg items-center justify-center active:bg-blue-100"
+                  disabled={isLoading}
                 >
-                  <Text className="text-white font-bold text-base">Novo Check-in</Text>
+                  <Icon name="add-line" size={20} color="#2563eb" />
                 </TouchableOpacity>
-             </View>
-          )}
-        </View>
-
-      </ScrollView>
-
-      {/* --- MODAL DE CARROS --- */}
-      <Modal visible={isCarModalOpen} transparent animationType="slide">
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-3xl p-6 h-[50%]">
-            <Text className="text-xl font-bold text-center mb-4">Escolha o Veículo</Text>
-            <FlatList
-              data={CARS}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  onPress={() => handleSelectCar(item)}
-                  className="p-4 border-b border-gray-100 active:bg-gray-50"
-                >
-                  <Text className="text-lg font-bold text-gray-800">{item.model}</Text>
-                  <Text className="text-gray-500">{item.plate}</Text>
-                </TouchableOpacity>
-              )}
-            />
-            <TouchableOpacity onPress={() => setIsCarModalOpen(false)} className="mt-4 p-3 bg-gray-200 rounded-lg items-center">
-              <Text className="font-bold text-gray-700">Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* --- MODAL DE HORAS --- */}
-      <Modal visible={isHourModalOpen} transparent animationType="slide">
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-3xl p-6">
-            <Text className="text-xl font-bold text-center mb-4">Escolha a Duração</Text>
-            <View className="gap-2">
-              {HOURS.map((h) => (
-                <TouchableOpacity
-                  key={h}
-                  onPress={() => handleSelectHour(h)}
-                  className="p-4 bg-gray-50 border border-gray-100 rounded-lg items-center active:bg-blue-50 active:border-blue-200"
-                >
-                  <Text className="text-lg font-bold text-gray-800">{h} Horas</Text>
-                </TouchableOpacity>
-              ))}
+              </View>
             </View>
-             <TouchableOpacity onPress={() => setIsHourModalOpen(false)} className="mt-4 p-3 bg-gray-200 rounded-lg items-center">
-              <Text className="font-bold text-gray-700">Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
 
-    </SafeAreaView>
+            {/* 3. MÉTODO DE PAGAMENTO (usarCredito) */}
+            <View className="mb-6">
+              <Text className="text-gray-500 text-xs uppercase font-bold mb-2 ml-1">Método de Pagamento</Text>
+              
+              {/* Opção: Saldo Disponível */}
+              <TouchableOpacity 
+                onPress={() => setUsarCredito(true)}
+                disabled={isLoading}
+                className={`flex-row items-center p-4 rounded-xl mb-2 border ${usarCredito ? 'bg-blue-50 border-blue-500' : 'bg-white border-transparent'}`}
+              >
+                <View className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${usarCredito ? 'border-blue-600' : 'border-gray-300'}`}>
+                  {usarCredito && <View className="w-2.5 h-2.5 bg-blue-600 rounded-full" />}
+                </View>
+                <Icon name="wallet-3-line" size={20} color={usarCredito ? "#2563eb" : "#6b7280"} />
+                <Text className={`ml-2 font-semibold ${usarCredito ? 'text-blue-700' : 'text-gray-600'}`}>
+                  Usar Saldo da Carteira
+                </Text>
+              </TouchableOpacity>
+
+              {/* Opção: Cartão de Crédito */}
+              <TouchableOpacity 
+                onPress={() => setUsarCredito(false)}
+                disabled={isLoading}
+                className={`flex-row items-center p-4 rounded-xl border ${!usarCredito ? 'bg-blue-50 border-blue-500' : 'bg-white border-transparent'}`}
+              >
+                <View className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${!usarCredito ? 'border-blue-600' : 'border-gray-300'}`}>
+                  {!usarCredito && <View className="w-2.5 h-2.5 bg-blue-600 rounded-full" />}
+                </View>
+                <Icon name="bank-card-line" size={20} color={!usarCredito ? "#2563eb" : "#6b7280"} />
+                <Text className={`ml-2 font-semibold ${!usarCredito ? 'text-blue-700' : 'text-gray-600'}`}>
+                  Cartão de Crédito
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* 4. BOTÃO DE AÇÃO */}
+            <TouchableOpacity 
+              className={`w-full py-4 rounded-xl shadow-md flex-row items-center justify-center space-x-3 ${isLoading ? 'bg-blue-400' : 'bg-blue-600 active:bg-blue-700'}`}
+              onPress={handleEstacionar}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <>
+                  <Text className="text-white font-bold text-lg">Confirmar Estacionamento</Text>
+                  <View className="bg-blue-800/30 px-2 py-1 rounded">
+                     <Text className="text-white font-bold text-xs">R$ {valorTotal.toFixed(2).replace('.', ',')}</Text>
+                  </View>
+                </>
+              )}
+            </TouchableOpacity>
+
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }

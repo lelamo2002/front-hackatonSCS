@@ -90,7 +90,7 @@ export default function HomeScreen() {
           {/* Park now button */}
           <TouchableOpacity 
             className="w-full bg-blue-600 py-4 rounded-xl shadow-md flex-row items-center justify-center space-x-2 mb-4 active:bg-blue-700"
-            onPress={() => console.log("Estacionar pressed")}
+            onPress={() => router.push("/park/check-in")}
           >
             <Icon name="car-line" size={20} color="white" />
             <Text className="text-white font-semibold text-lg">Estacionar agora</Text>
