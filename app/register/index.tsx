@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
+import { auth } from "../../api";
 import "../../global.css";
 
 // Validação de CPF
@@ -129,12 +130,26 @@ export default function RegisterPage() {
 
 
 
-  const onSubmitStep3 = (data: Step3Data) => {
+  const onSubmitStep3 = async (data: Step3Data) => {
     const finalData = { ...formData, ...data };
     console.log("Dados finais:", finalData);
-    // Aqui você pode enviar os dados para a API
-    alert("Cadastro realizado com sucesso!");
-    router.replace("/(tabs)");
+    
+    try {
+      await auth.register({
+        nome: finalData.nome,
+        email: finalData.email,
+        senha: finalData.senha,
+        celular: finalData.celular,
+        cpf: finalData.cpf,
+        placaDoCarro: finalData.placa
+      });
+      alert("Cadastro realizado com sucesso!");
+      router.replace("/(tabs)/home");
+    } catch (error: any) {
+      console.error(error);
+      const message = error.response?.data?.message || "Erro ao realizar cadastro. Tente novamente.";
+      alert(message);
+    }
   };
 
   const formatCPF = (text: string) => {
@@ -248,12 +263,21 @@ export default function RegisterPage() {
               )}
             </View>
 
-            <TouchableOpacity
-              className="bg-blue-500 rounded-lg py-4 items-center"
-              onPress={handleSubmit1(onSubmitStep1)}
-            >
-              <Text className="text-white text-base font-semibold">Continuar</Text>
-            </TouchableOpacity>
+            <View className="flex-row space-x-3">
+              <TouchableOpacity
+                className="flex-1 border border-gray-300 rounded-lg py-4 items-center"
+                onPress={() => router.back()}
+              >
+                <Text className="text-gray-700 text-base font-semibold">Voltar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="flex-1 bg-blue-500 rounded-lg py-4 items-center"
+                onPress={handleSubmit1(onSubmitStep1)}
+              >
+                <Text className="text-white text-base font-semibold">Continuar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
+import { auth } from "../../api";
 import "../../global.css";
 
 const loginSchema = z.object({
@@ -31,14 +32,17 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginData) => {
     setIsLoading(true);
-    console.log("Login data:", data);
-    
-    // Simulating API call
-    setTimeout(() => {
+    try {
+      await auth.login(data.email, data.senha);
+      // alert("Login realizado com sucesso!");
+      router.replace("/(tabs)/home");
+    } catch (error: any) {
+      console.error(error);
+      const message = error.response?.data?.message || "Erro ao realizar login. Verifique suas credenciais.";
+      alert(message);
+    } finally {
       setIsLoading(false);
-      // alert("Login realizado com sucesso!"); // Removed alert to just redirect
-      router.replace("/(tabs)");
-    }, 1000);
+    }
   };
 
   return (
