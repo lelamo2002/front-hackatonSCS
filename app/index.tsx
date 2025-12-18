@@ -1,16 +1,23 @@
-import { useRouter } from "expo-router"; // 1. Importar o hook de rotas
-import { View } from "react-native";
+
+import { Link } from "expo-router";
+import { Text, View } from "react-native";
 import "../global.css";
 import OSMWebView from "./components/OSMWebView";
 
 export default function Index() {
-  const router = useRouter(); // 2. Inicializar o hook
 
   return (
-    <View className="flex-1 bg-white">
-      {/* -- MAPA NO FUNDO (Ocupa tudo) -- */}
-      <View className="absolute inset-0 z-0">
-        <OSMWebView />
+    {/* -- MAPA NO FUNDO (Ocupa tudo) -- */}
+    <View className="flex-1 items-center justify-center bg-white">
+      <Text className="text-2xl font-bold mb-6">SCS Hackathon</Text>
+      <OSMWebView />
+      <View className="space-y-4">
+        <Link href="/login" asChild>
+          <Text className="text-blue-500 text-lg p-2">Ir para Login</Text>
+        </Link>
+        <Link href="/register" asChild>
+          <Text className="text-blue-500 text-lg p-2">Ir para Cadastro</Text>
+        </Link>
       </View>
     </View>
   );

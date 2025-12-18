@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 const api = axios.create({
@@ -7,5 +8,37 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+api.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const auth = {
+  login: async (email: string, senha: string) => {
+    const response = await api.post('/auth/login', { email, senha });
+    if (response.data.token) {
+      await AsyncStorage.setItem('token', response.data.token);
+    }
+    return response.data;
+  },
+  register: async (data: any) => {
+    const response = await api.post('/auth/register', data);
+    if (response.data.token) {
+      await AsyncStorage.setItem('token', response.data.token);
+    }
+    return response.data;
+  },
+  logout: async () => {
+    await AsyncStorage.removeItem('token');
+  },
+  me: async () => {
+    const response = await api.get('/me');
+    return response.data;
+  }
+};
 
 export default api;
