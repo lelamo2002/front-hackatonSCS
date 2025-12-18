@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
-import { auth } from "../../api";
+import { auth } from "../api";
 
 export default function ProfileScreen() {
   const router = useRouter();

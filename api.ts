@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { User } from './types';
 
 const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000',
@@ -35,7 +36,7 @@ export const auth = {
   logout: async () => {
     await AsyncStorage.removeItem('token');
   },
-  me: async () => {
+  me: async (): Promise<User> => {
     const response = await api.get('/me');
     return response.data;
   }

@@ -20,27 +20,27 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: "Home",
+          title: "Estacionar",
           tabBarIcon: ({ color }) => (
-            <Icon name="home-line" size={24} color={color} />
+            <Icon name="car-line" size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="credits"
         options={{
-          title: "Buscar",
+          title: "Crédito",
           tabBarIcon: ({ color }) => (
-            <Icon name="search-line" size={24} color={color} />
+            <Icon name="wallet-line" size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="benefits"
         options={{
-          title: "Perfil",
+          title: "Benefícios",
           tabBarIcon: ({ color }) => (
-            <Icon name="user-line" size={24} color={color} />
+            <Icon name="gift-line" size={24} color={color} />
           ),
         }}
       />
