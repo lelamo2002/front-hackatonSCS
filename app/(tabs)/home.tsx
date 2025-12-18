@@ -42,12 +42,12 @@ export default function HomeScreen() {
         <ScrollView className="flex-1 px-6 pt-2" contentContainerStyle={{ paddingBottom: 100 }}>
           {/* Vehicle card */}
           <View className="bg-white rounded-2xl p-4 shadow-sm mb-4 flex-row items-center space-x-4">
-            <View className="w-14 h-14 bg-blue-600 rounded-xl items-center justify-center shadow-sm">
+            <View className="w-14 h-14 bg-blue-600 rounded-full items-center justify-center shadow-sm mr-4">
               <Icon name="car-line" size={28} color="white" />
             </View>
             <View className="flex-1">
               <View className="flex-row items-center space-x-2">
-                <Text className="font-bold text-gray-900 text-lg">ABC-1D23</Text>
+                <Text className="font-bold text-gray-900 text-lg mr-2">ABC-1D23</Text>
                 <View className="w-2 h-2 bg-green-500 rounded-full" />
               </View>
               <Text className="text-gray-500 text-sm">Honda Civic Preto</Text>
@@ -78,7 +78,7 @@ export default function HomeScreen() {
 
           {/* Operating hours */}
           <View className="bg-white rounded-2xl p-4 shadow-sm mb-4 flex-row items-center space-x-4">
-            <View className="w-12 h-12 bg-yellow-100 rounded-xl items-center justify-center">
+            <View className="w-12 h-12 bg-yellow-100 rounded-xl items-center justify-center mr-4">
               <Icon name="time-line" size={24} color="#eab308" />
             </View>
             <View>
@@ -93,7 +93,7 @@ export default function HomeScreen() {
             onPress={() => console.log("Estacionar pressed")}
           >
             <Icon name="car-line" size={20} color="white" />
-            <Text className="text-white font-semibold text-lg">Estacionar agora</Text>
+            <Text className="text-white font-semibold text-lg ml-2">Estacionar agora</Text>
           </TouchableOpacity>
           
           <Text className="text-center text-gray-500 text-sm mb-4">
@@ -105,7 +105,7 @@ export default function HomeScreen() {
             onPress={() => router.push("/benefits")}
             className="w-full bg-white rounded-2xl p-4 shadow-sm flex-row items-center space-x-4 mb-8 active:bg-gray-50"
           >
-            <View className="w-12 h-12 bg-blue-50 rounded-xl items-center justify-center">
+            <View className="w-12 h-12 bg-blue-50 rounded-xl items-center justify-center mr-4">
               <Icon name="coupon-3-line" size={24} color="#3b82f6" />
             </View>
             <View className="flex-1">

@@ -53,14 +53,14 @@ export default function BenefitsScreen() {
                <View className="w-8 h-8 bg-green-500 rounded-lg items-center justify-center">
                  <Icon name="check-line" size={16} color="white" />
                </View>
-               <Text className="text-sm font-medium text-gray-900 flex-1">Até R$ 5,00 por cupom escaneado</Text>
+               <Text className="text-sm font-medium text-gray-900 flex-1 ml-2">Até R$ 20,00 por cupom escaneado</Text>
              </View>
 
              <View className="flex-row items-center space-x-3 p-3 bg-blue-50 rounded-xl">
                <View className="w-8 h-8 bg-blue-600 rounded-lg items-center justify-center">
                  <Icon name="timer-flash-line" size={16} color="white" />
                </View>
-               <Text className="text-sm font-medium text-gray-900 flex-1">Créditos adicionados instantaneamente</Text>
+               <Text className="text-sm font-medium text-gray-900 flex-1 ml-2">Créditos adicionados instantaneamente</Text>
              </View>
            </View>
         </View>
