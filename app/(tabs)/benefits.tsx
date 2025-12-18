@@ -70,7 +70,7 @@ export default function BenefitsScreen() {
       <View className="p-6 bg-white border-t border-gray-50">
         <TouchableOpacity 
           className="w-full bg-blue-600 py-4 rounded-xl shadow-lg items-center active:bg-blue-700"
-          onPress={() => console.log("Ativar Beneficio Pressed")}
+          onPress={() => router.push("/scanner")}
         >
           <Text className="text-white font-bold text-lg">Ativar Benefício</Text>
         </TouchableOpacity>
