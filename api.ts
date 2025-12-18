@@ -42,4 +42,11 @@ export const auth = {
   }
 };
 
+export const tickets = {
+  redeemDefault: async (chave: string) => {
+    const response = await api.post('/tickets/descontos', { chave });
+    return response.data;
+  }
+};
+
 export default api;

@@ -11,6 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 import Icon from "react-native-remix-icon";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { tickets } from "../../api";
 
 export default function ScannerScreen() {
   const router = useRouter();
@@ -30,12 +31,48 @@ export default function ScannerScreen() {
     transform: [{ translateY: scanPosition.value * 200 }], // Move 200px down (approx height of frame)
   }));
 
-  const handleBarcodeScanned = ({ data }: { data: string }) => {
+
+  const handleBarcodeScanned = async ({ data }: { data: string }) => {
     if (scanned) return;
     setScanned(true);
-    // Here you would normally handle the scanned data
-    // console.log("Scanned:", data);
-    router.replace("/success");
+
+    try {
+        console.log("Scanning code:", data);
+        await tickets.redeemDefault(data);
+        
+        router.replace({
+            pathname: "/success",
+            params: {
+                status: 'success',
+                title: 'Sucesso!',
+                message: 'Crédito adicionado com sucesso.',
+                amount: 'R$ 5,00' // Assuming fixed amount for now based on user context "da credito via NF"
+            }
+        });
+    } catch (error: any) {
+        console.error("Scan error:", error);
+        let errorMessage = "Ocorreu um erro ao processar o ticket.";
+        let errorTitle = "Erro";
+
+        if (error.response) {
+            if (error.response.status === 400) {
+                 errorMessage = "Código inválido ou mal formatado.";
+                 errorTitle = "Código Inválido";
+            } else if (error.response.status === 409) {
+                 errorMessage = "Nota fiscal já utilizada ou inválida.";
+                 errorTitle = "Cupom Já Utilizado";
+            }
+        }
+
+        router.replace({
+            pathname: "/success",
+            params: {
+                status: 'error',
+                title: errorTitle,
+                message: errorMessage
+            }
+        });
+    }
   };
 
   if (!permission) {
