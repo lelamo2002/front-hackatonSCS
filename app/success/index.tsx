@@ -2,11 +2,11 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withDelay,
-    withSpring,
-    withTiming
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+  withTiming
 } from "react-native-reanimated";
 import Icon from "react-native-remix-icon";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,6 +18,17 @@ export default function ResultScreen() {
   const title = (params.title as string) || 'Sucesso!';
   const message = (params.message as string) || 'Operação realizada com sucesso.';
   
+  // Parse numeric values from params
+  const creditoGerado = params.creditoGerado ? parseFloat(params.creditoGerado as string) : null;
+  const valorNf = params.valorNf ? parseFloat(params.valorNf as string) : null;
+  
+  // Fallback to legacy amount param if creditoGerado is not present
+  const displayAmount = creditoGerado !== null ? creditoGerado : (params.amount ? parseFloat(params.amount as string) : null);
+
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
+
   const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
 
@@ -76,17 +87,25 @@ export default function ResultScreen() {
             {message}
           </Text>
 
-          {/* Conditional Balance Preview for Success (Generic for now) */}
-          {isSuccess && params.amount ? (
-              <View className="w-full bg-blue-600 rounded-2xl p-6 shadow-md shadow-blue-200 mb-12 relative overflow-hidden">
+          {/* Conditional Balance Preview for Success */}
+          {isSuccess && displayAmount !== null ? (
+              <View className="w-full bg-blue-600 rounded-2xl p-6 shadow-md shadow-blue-200 mb-8 relative overflow-hidden">
                  {/* Decorative circles simulation */}
                 <View className="absolute -top-8 -right-8 w-32 h-32 bg-white opacity-10 rounded-full" />
                 
                  <View className="flex-row items-center space-x-2 mb-2">
                     <Icon name="wallet-3-line" size={20} color="rgba(255,255,255,0.8)" />
-                    <Text className="text-white opacity-80 text-sm font-medium">Bônus Recebido</Text>
+                    <Text className="text-white opacity-80 text-sm font-medium ml-2">Crédito Gerado</Text>
                  </View>
-                 <Text className="text-3xl font-bold text-white">{params.amount}</Text>
+                 <Text className="text-3xl font-bold text-white mb-2">
+                    {formatCurrency(displayAmount)}
+                 </Text>
+                 
+                 {valorNf !== null && (
+                   <View className="pt-2 border-t border-white/20 mt-2">
+                     <Text className="text-blue-100 text-xs">Valor da NF: {formatCurrency(valorNf)}</Text>
+                   </View>
+                 )}
               </View>
           ) : null}
         </Animated.View>

@@ -38,15 +38,16 @@ export default function ScannerScreen() {
 
     try {
         console.log("Scanning code:", data);
-        await tickets.redeemDefault(data);
+        const result = await tickets.redeemDefault(data);
         
         router.replace({
             pathname: "/success",
             params: {
                 status: 'success',
                 title: 'Sucesso!',
-                message: 'Crédito adicionado com sucesso.',
-                amount: 'R$ 5,00' // Assuming fixed amount for now based on user context "da credito via NF"
+                message: 'Crédito calculdado com sucesso.',
+                creditoGerado: result.creditoGerado?.toString(),
+                valorNf: result.valorNf?.toString()
             }
         });
     } catch (error: any) {

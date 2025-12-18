@@ -1,7 +1,10 @@
 import { Stack } from "expo-router";
-import { View } from "react-native";
+import { LogBox, View } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import "../global.css";
+
+// Ignore all logs for demo purposes
+LogBox.ignoreAllLogs(true);
 
 export default function RootLayout() {
   const insets = useSafeAreaInsets();
